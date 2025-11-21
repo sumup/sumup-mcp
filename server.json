@@ -1,0 +1,25 @@
+{
+	"$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+	"name": "io.github.sumup/mcp",
+	"title": "SumUp MCP Server",
+	"description": "Tools to explore SumUp accounts, payments, customers, and payouts.",
+	"repository": {
+		"url": "https://github.com/sumup/sumup-mcp",
+		"source": "github"
+	},
+	"version": "0.1.1",
+	"remotes": [
+		{
+			"type": "streamable-http",
+			"url": "https://mcp.sumup.com",
+			"headers": [
+				{
+					"name": "Authentication",
+					"description": "SumUp API key for authentication.",
+					"is_required": true,
+					"is_secret": true
+				}
+			]
+		}
+	]
+}

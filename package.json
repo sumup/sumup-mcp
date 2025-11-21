@@ -1,0 +1,55 @@
+{
+	"name": "@sumup/mcp",
+	"version": "0.1.2",
+	"description": "MCP server for interacting with SumUp.",
+	"homepage": "https://github.com/sumup/sumup-mcp",
+	"license": "Apache-2.0",
+	"author": "SumUp <support@sumup.com> (https://sumup.com/)",
+	"mcpName": "io.github.sumup/mcp",
+	"scripts": {
+		"build": "tsc --noEmit -p tsconfig.json",
+		"dev": "wrangler dev --local",
+		"deploy": "wrangler deploy",
+		"typecheck": "tsc --noEmit -p tsconfig.json",
+		"lint": "biome check",
+		"lint:fix": "biome check --write",
+		"generate-types": "wrangler types"
+	},
+	"publishConfig": {
+		"provenance": true,
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/sumup/sumup-mcp.git"
+	},
+	"bugs": {
+		"url": "https://github.com/sumup/sumup-mcp/issues"
+	},
+	"keywords": [
+		"sumup",
+		"payments",
+		"mcp",
+		"mcp-server",
+		"modelcontextprotocol"
+	],
+	"type": "module",
+	"engines": {
+		"node": ">=22"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.22.0",
+		"@sumup/agent-toolkit": "^0.2.0",
+		"agents": "^0.2.23",
+		"zod": "^3.25.76"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.7",
+		"@types/node": "^24.10.1",
+		"typescript": "^5.5.4",
+		"wrangler": "^4.50.0"
+	},
+	"optionalDependencies": {
+		"@biomejs/cli-darwin-arm64": "^2.3.7"
+	}
+}

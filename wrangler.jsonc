@@ -1,0 +1,101 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "sumup-mcp-server",
+	"main": "src/worker.ts",
+	"compatibility_date": "2025-08-15",
+	"workers_dev": true,
+	"preview_urls": true,
+	"upload_source_maps": true,
+	"compatibility_flags": ["nodejs_compat"],
+	"observability": {
+		"enabled": true
+	},
+	"build": {
+		"command": "npm run build"
+	},
+	"migrations": [
+		{
+			"new_sqlite_classes": ["SumUpMcpAgent"],
+			"tag": "v1"
+		}
+	],
+	"env": {
+		"dev": {
+			"account_id": "2037fc18a2fb8175c20d20776cac65c5",
+			"build": {
+				"command": "npm run build"
+			},
+			"vars": {
+				"SUMUP_API_HOST": "https://api-theta.sam-app.ro"
+			},
+			"routes": [
+				{
+					"pattern": "mcp-theta.sam-app.ro",
+					"custom_domain": true
+				}
+			],
+			"durable_objects": {
+				"bindings": [
+					{
+						"name": "SUMUP_MCP_AGENT",
+						"class_name": "SumUpMcpAgent"
+					}
+				]
+			}
+		},
+		"stage": {
+			"account_id": "2037fc18a2fb8175c20d20776cac65c5",
+			"build": {
+				"command": "npm run build"
+			},
+			"vars": {
+				"SUMUP_API_HOST": "https://api.sam-app.ro"
+			},
+			"routes": [
+				{
+					"pattern": "mcp.sam-app.ro",
+					"custom_domain": true
+				}
+			],
+			"durable_objects": {
+				"bindings": [
+					{
+						"name": "SUMUP_MCP_AGENT",
+						"class_name": "SumUpMcpAgent"
+					}
+				]
+			}
+		},
+		"live": {
+			"account_id": "2037fc18a2fb8175c20d20776cac65c5",
+			"build": {
+				"command": "npm run build"
+			},
+			"vars": {
+				"SUMUP_API_HOST": "https://api.sumup.com"
+			},
+			"routes": [
+				{
+					"pattern": "mcp.sumup.com",
+					"custom_domain": true
+				}
+			],
+			"durable_objects": {
+				"bindings": [
+					{
+						"name": "SUMUP_MCP_AGENT",
+						"class_name": "SumUpMcpAgent"
+					}
+				]
+			}
+		}
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "SUMUP_MCP_AGENT",
+				"class_name": "SumUpMcpAgent"
+			}
+		]
+	}
+}
