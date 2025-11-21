@@ -18,6 +18,8 @@ wrangler dev                             # or `npm run dev`
 
 Every MCP request must include a SumUp API key through the `Authorization: Bearer <apiKey>` header. We currently don't support other authentication methods. The worker listens on `/mcp` for the Streamable HTTP transport and `/sse` for the legacy SSE transport.
 
+You can get your API key from the [developer settings](https://me.sumup.com/settings/api-keys) in the SumUp Dashboard.
+
 ## Using from an MCP client
 
 Any client that speaks the Streamable HTTP transport can connect to this server. For example, using [`mcp-remote`](https://www.npmjs.com/package/mcp-remote):
