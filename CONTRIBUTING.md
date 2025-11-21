@@ -3,10 +3,16 @@
 ## Development
 
 ```sh
-cd codegen && npm run build && cd ..
-cd sdk && npm run generate && cd ..
+npm install
+npm run dev
+```
+
+To test the server, you can use for example [MCP Inspector](https://github.com/modelcontextprotocol/inspector):
+
+```sh
+npx @modelcontextprotocol/inspector
 ```
 
 ## Conventional Commits
 
-`sumup-ts` heavily relies on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) which are used to generate changelog. All PR titles must follow the conventional commits standard.
+We rely on [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) which are used to generate changelog. All PR titles must follow the conventional commits standard.
