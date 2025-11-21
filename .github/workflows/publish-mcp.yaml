@@ -1,9 +1,9 @@
 name: Publish MCP
 
 on:
-  release:
-    types:
-      - published
+  push:
+    branches:
+      - main
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -14,14 +14,10 @@ permissions:
 
 jobs:
   publish:
-    if: startsWith(github.event.release.tag_name, 'mcp-v') && github.event.release.draft == false && github.event.release.prerelease == false
     name: Publish
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-    defaults:
-      run:
-        working-directory: ./mcp
     steps:
       - name: Checkout release tag
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -33,16 +29,6 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: ./mcp
-          registry-url: https://registry.npmjs.org
-          always-auth: true
-
-      - name: Verify npm authentication
-        run: |
-          if [ -z "${NODE_AUTH_TOKEN}" ]; then
-            echo "::error title=NPM token missing::The NPM_TOKEN secret is not configured. Add it to the repository secrets to enable npm publishing."
-            exit 1
-          fi
 
       - name: Install dependencies
         run: npm ci
