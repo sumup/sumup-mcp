@@ -13,7 +13,7 @@ SumUp's [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduct
 
 ```bash
 npm install
-wrangler dev                             # or `npm run dev`
+npm run dev
 ```
 
 Every MCP request must include a SumUp API key through the `Authorization: Bearer <apiKey>` header. We currently don't support other authentication methods. The worker listens on `/mcp` for the Streamable HTTP transport and `/sse` for the legacy SSE transport.
