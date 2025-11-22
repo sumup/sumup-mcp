@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "sumup-mcp-server",
+	"name": "sumup-mcp",
 	"main": "src/worker.ts",
 	"compatibility_date": "2025-08-15",
 	"workers_dev": true,
