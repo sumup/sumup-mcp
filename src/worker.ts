@@ -16,12 +16,26 @@ export type Env = {
 	SUMUP_API_HOST: string;
 };
 
+const CORS_HEADERS = {
+	"Access-Control-Allow-Origin": "*",
+	"Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+	"Access-Control-Allow-Headers":
+		"Content-Type, Accept, Authorization, mcp-session-id, MCP-Protocol-Version",
+	"Access-Control-Max-Age": "86400",
+};
+
 export default {
 	async fetch(
 		request: Request,
 		env: Env,
 		ctx: ExecutionContext,
 	): Promise<Response> {
+		if (request.method === "OPTIONS") {
+			return new Response(null, {
+				headers: CORS_HEADERS,
+			});
+		}
+
 		const url = new URL(request.url);
 		if (url.pathname !== MCP_ROUTE && url.pathname !== SSE_ROUTE) {
 			return new Response("Not Found", { status: 404 });
