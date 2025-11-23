@@ -15,7 +15,7 @@ export function createSumUpServer({ apiKey }: { apiKey: string }): McpServer {
 }
 
 export interface SumUpAgentProps extends Record<string, unknown> {
-	apiKey: string;
+	apiKey?: string;
 }
 
 export class SumUpMcpAgent extends McpAgent<unknown, never, SumUpAgentProps> {

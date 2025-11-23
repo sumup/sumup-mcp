@@ -5,25 +5,19 @@ const SSE_ROUTE = "/sse";
 
 const mcpHandler = SumUpMcpAgent.serve(MCP_ROUTE, {
 	binding: "SUMUP_MCP_AGENT",
-	corsOptions: {
-		origin: "*",
-		methods: "GET, POST, DELETE, OPTIONS",
-		headers:
-			"Content-Type, Accept, Authorization, mcp-session-id, MCP-Protocol-Version",
-		maxAge: 86400,
-	},
 });
 
 const sseHandler = SumUpMcpAgent.serveSSE(SSE_ROUTE, {
 	binding: "SUMUP_MCP_AGENT",
-	corsOptions: {
-		origin: "*",
-		methods: "GET, POST, DELETE, OPTIONS",
-		headers:
-			"Content-Type, Accept, Authorization, mcp-session-id, MCP-Protocol-Version",
-		maxAge: 86400,
-	},
 });
+
+const CORS_HEADERS = {
+	"Access-Control-Allow-Origin": "*",
+	"Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+	"Access-Control-Allow-Headers":
+		"Content-Type, Accept, Authorization, mcp-session-id, MCP-Protocol-Version",
+	"Access-Control-Max-Age": "86400",
+};
 
 type ContextWithProps = ExecutionContext & { props?: SumUpAgentProps };
 
@@ -37,13 +31,19 @@ export default {
 		env: Env,
 		ctx: ExecutionContext,
 	): Promise<Response> {
+		if (request.method === "OPTIONS") {
+			return new Response(null, {
+				headers: CORS_HEADERS,
+			});
+		}
+
 		const url = new URL(request.url);
 		if (url.pathname !== MCP_ROUTE && url.pathname !== SSE_ROUTE) {
 			return new Response("Not Found", { status: 404 });
 		}
 
 		const apiKey = extractApiKey(request);
-		if (!apiKey) {
+		if (!apiKey && request.method !== "OPTIONS") {
 			return unauthorizedResponse();
 		}
 		const contextWithProps = ctx as ContextWithProps;
