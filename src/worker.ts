@@ -43,9 +43,10 @@ export default {
 		}
 
 		const apiKey = extractApiKey(request);
-		if (!apiKey && request.method !== "OPTIONS") {
+		if (!apiKey) {
 			return unauthorizedResponse();
 		}
+
 		const contextWithProps = ctx as ContextWithProps;
 		contextWithProps.props = { apiKey };
 		if (url.pathname.startsWith(SSE_ROUTE)) {
