@@ -40,7 +40,7 @@
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.23.0",
 		"@sumup/agent-toolkit": "^0.7.2",
-		"agents": "^0.2.25"
+		"agents": "^0.2.26"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.7",
