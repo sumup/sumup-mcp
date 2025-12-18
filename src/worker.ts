@@ -34,9 +34,12 @@ export default {
 		}
 
 		const url = new URL(request.url);
-		if (url.pathname === "/.well-known/oauth-protected-resource") {
+		if (
+			request.method === "GET" &&
+			url.pathname === "/.well-known/oauth-protected-resource"
+		) {
 			return Response.json({
-				resource: "https://mcp.sumup.com",
+				resource: env.HOST,
 				authorization_servers: [env.SUMUP_AUTH_HOST],
 			});
 		}
