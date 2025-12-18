@@ -18,7 +18,7 @@ export interface SumUpAgentProps extends Record<string, unknown> {
 	apiKey?: string;
 }
 
-export class SumUpMcpAgent extends McpAgent<unknown, never, SumUpAgentProps> {
+export class SumUpMcpAgent extends McpAgent<Env, never, SumUpAgentProps> {
 	private _server: McpServer | undefined;
 
 	set server(server: McpServer) {
@@ -40,6 +40,7 @@ export class SumUpMcpAgent extends McpAgent<unknown, never, SumUpAgentProps> {
 
 		this.server = new SumUpAgentToolkit({
 			apiKey: props.apiKey,
+			host: this.env.SUMUP_API_HOST,
 			configuration: {
 				capabilities: {
 					resources: {},

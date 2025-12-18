@@ -26,7 +26,9 @@
 				"command": "npm run build"
 			},
 			"vars": {
-				"SUMUP_API_HOST": "https://api-theta.sam-app.ro"
+				"HOST": "https://mcp-theta.sam-app.ro",
+				"SUMUP_API_HOST": "https://api-theta.sam-app.ro",
+				"SUMUP_AUTH_HOST": "https://auth-theta.sam-app.ro"
 			},
 			"routes": [
 				{
@@ -49,7 +51,9 @@
 				"command": "npm run build"
 			},
 			"vars": {
-				"SUMUP_API_HOST": "https://api.sam-app.ro"
+				"HOST": "https://mcp.sam-app.ro",
+				"SUMUP_API_HOST": "https://api.sam-app.ro",
+				"SUMUP_AUTH_HOST": "https://auth.sam-app.ro"
 			},
 			"routes": [
 				{
@@ -72,7 +76,9 @@
 				"command": "npm run build"
 			},
 			"vars": {
-				"SUMUP_API_HOST": "https://api.sumup.com"
+				"HOST": "https://mcp.sumup.com",
+				"SUMUP_API_HOST": "https://api.sumup.com",
+				"SUMUP_AUTH_HOST": "https://auth.sumup.com"
 			},
 			"routes": [
 				{

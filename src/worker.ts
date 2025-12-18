@@ -21,10 +21,6 @@ const CORS_HEADERS = {
 
 type ContextWithProps = ExecutionContext & { props?: SumUpAgentProps };
 
-export type Env = {
-	SUMUP_API_HOST: string;
-};
-
 export default {
 	async fetch(
 		request: Request,
@@ -39,12 +35,10 @@ export default {
 
 		const url = new URL(request.url);
 		if (url.pathname === "/.well-known/oauth-protected-resource") {
-			return Response.json(
-				{
-					resource: "https://mcp.sumup.com",
-					authorization_servers: ["https://auth.sumup.com"],
-				},
-			);
+			return Response.json({
+				resource: "https://mcp.sumup.com",
+				authorization_servers: [env.SUMUP_AUTH_HOST],
+			});
 		}
 
 		if (url.pathname !== MCP_ROUTE && url.pathname !== SSE_ROUTE) {
