@@ -38,6 +38,15 @@ export default {
 		}
 
 		const url = new URL(request.url);
+		if (url.pathname === "/.well-known/oauth-protected-resource") {
+			return Response.json(
+				{
+					resource: "https://mcp.sumup.com",
+					authorization_servers: ["https://auth.sumup.com"],
+				},
+			);
+		}
+
 		if (url.pathname !== MCP_ROUTE && url.pathname !== SSE_ROUTE) {
 			return new Response("Not Found", { status: 404 });
 		}
