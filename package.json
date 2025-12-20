@@ -39,7 +39,7 @@
 	},
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.23.0",
-		"@sumup/agent-toolkit": "^0.7.2",
+		"@sumup/agent-toolkit": "^0.8.0",
 		"agents": "^0.2.25"
 	},
 	"devDependencies": {

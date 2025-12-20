@@ -41,6 +41,7 @@ export class SumUpMcpAgent extends McpAgent<Env, never, SumUpAgentProps> {
 		this.server = new SumUpAgentToolkit({
 			apiKey: props.apiKey,
 			host: this.env.SUMUP_API_HOST,
+			resource: this.env.HOST,
 			configuration: {
 				capabilities: {
 					resources: {},

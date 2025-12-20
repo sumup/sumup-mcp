@@ -40,7 +40,11 @@ export default {
 		) {
 			return Response.json({
 				resource: env.HOST,
+				resource_name: "SumUp MCP",
+				resource_documentation: "https://developer.sumup.com/tools/llms",
 				authorization_servers: [env.SUMUP_AUTH_HOST],
+				scopes_supported: ["offline_access", "openai", "email"],
+				bearer_methods_supported: ["header"],
 			});
 		}
 
