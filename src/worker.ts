@@ -34,6 +34,7 @@ export default {
 		}
 
 		const url = new URL(request.url);
+
 		if (
 			request.method === "GET" &&
 			url.pathname === "/.well-known/oauth-protected-resource"
@@ -45,6 +46,16 @@ export default {
 				authorization_servers: [env.SUMUP_AUTH_HOST],
 				scopes_supported: ["offline_access", "openai", "email"],
 				bearer_methods_supported: ["header"],
+			});
+		}
+
+		if (
+			request.method === "GET" &&
+			url.pathname === "/.well-known/openai-apps-challenge" &&
+			env.OPENAI_APPS_CHALLENGE
+		) {
+			return new Response(env.OPENAI_APPS_CHALLENGE, {
+				headers: { "Content-Type": "text/plain" },
 			});
 		}
 
