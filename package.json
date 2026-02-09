@@ -38,7 +38,7 @@
 		"node": ">=22"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "^1.23.0",
+		"@modelcontextprotocol/sdk": "^1.25.1",
 		"@sumup/agent-toolkit": "^0.8.0",
 		"agents": "^0.2.32"
 	},
