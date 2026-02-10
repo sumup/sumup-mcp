@@ -38,17 +38,17 @@
 		"node": ">=22"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "^1.23.0",
-		"@sumup/agent-toolkit": "^0.8.0",
+		"@modelcontextprotocol/sdk": "^1.26.0",
+		"@sumup/agent-toolkit": "^0.9.0",
 		"agents": "^0.2.32"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.3.7",
+		"@biomejs/biome": "^2.3.14",
 		"@types/node": "^24.10.1",
 		"typescript": "^5.5.4",
-		"wrangler": "^4.53.0"
+		"wrangler": "^4.64.0"
 	},
 	"optionalDependencies": {
-		"@biomejs/cli-darwin-arm64": "^2.3.8"
+		"@biomejs/cli-darwin-arm64": "^2.3.14"
 	}
 }
