@@ -1,4 +1,8 @@
-import { type SumUpAgentProps, SumUpMcpAgent } from "./sumup-agent";
+import {
+	type SumUpAgentProps,
+	type SumUpEnv,
+	SumUpMcpAgent,
+} from "./sumup-agent";
 
 const MCP_ROUTE = "/mcp";
 const SSE_ROUTE = "/sse";
@@ -24,7 +28,7 @@ type ContextWithProps = ExecutionContext & { props?: SumUpAgentProps };
 export default {
 	async fetch(
 		request: Request,
-		env: Env,
+		env: SumUpEnv,
 		ctx: ExecutionContext,
 	): Promise<Response> {
 		if (request.method === "OPTIONS") {

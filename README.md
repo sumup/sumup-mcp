@@ -1,24 +1,31 @@
 <div align="center">
 
-# SumUp MCP Server
+# SumUp MCP Servers
 
 [![Documentation][docs-badge]](https://developer.sumup.com)
 [![License](https://img.shields.io/github/license/sumup/sumup-ts)](./LICENSE)
 
 </div>
 
-SumUp's [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server for interactions between large language models (LLMs) and SumUp APIs. The MCP server allows you to connect to SumUp's services from an MCP client (e.g. Cursor, Claude) and use natural language to work with your SumUp account.
+SumUp's [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) servers for interactions between large language models (LLMs) and SumUp APIs/documentation.
+
+## Apps layout
+
+- `apps/sumup-mcp`: MCP server for SumUp API tools (`mcp.sumup.com`).
+- `apps/docs-mcp`: MCP server for developer docs search via AutoRAG (`docs.mcp.sumup.com`).
+- `server.json` (root): registry descriptor listing all MCP remotes.
 
 ## Getting started
 
+From each app folder, install dependencies and run scripts:
+
 ```bash
-npm install
-npm run dev
+cd apps/sumup-mcp && npm install && npm run dev
+cd apps/docs-mcp && npm install && npm run dev
 ```
 
-Every MCP request must include a SumUp API key through the `Authorization: Bearer <apiKey>` header. We currently don't support other authentication methods. The worker listens on `/mcp` for the Streamable HTTP transport and `/sse` for the legacy SSE transport.
-
-You can get your API key from the [developer settings](https://me.sumup.com/settings/api-keys) in the SumUp Dashboard.
+`mcp.sumup.com` requires a SumUp API key via `Authorization: Bearer <apiKey>`.
+`docs.mcp.sumup.com` exposes `search_developer_docs` backed by Cloudflare AutoRAG.
 
 ## Using from an MCP client
 
