@@ -1,0 +1,51 @@
+name: CI SumUp MCP
+
+on:
+  push:
+    branches:
+      - main
+      - stage
+      - dev
+    paths:
+      - 'apps/sumup-mcp/**'
+      - '.github/workflows/ci-sumup-mcp.yaml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'apps/sumup-mcp/**'
+      - '.github/workflows/ci-sumup-mcp.yaml'
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: ./apps/sumup-mcp
+
+jobs:
+  lint:
+    name: Lint and Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/sumup-mcp/package.json
+
+      - name: Setup Biome CLI
+        uses: biomejs/setup-biome@29711cbb52afee00eb13aeb30636592f9edc0088 # v2.7.0
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Lint code
+        run: biome ci --diagnostic-level=error --reporter=github

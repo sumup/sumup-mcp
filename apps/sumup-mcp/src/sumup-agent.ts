@@ -2,6 +2,14 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SumUpAgentToolkit } from "@sumup/agent-toolkit/mcp";
 import { McpAgent } from "agents/mcp";
 
+export interface SumUpEnv {
+	HOST: string;
+	SUMUP_API_HOST: string;
+	SUMUP_AUTH_HOST: string;
+	OPENAI_APPS_CHALLENGE?: string;
+	SUMUP_MCP_AGENT: DurableObjectNamespace;
+}
+
 export function createSumUpServer({ apiKey }: { apiKey: string }): McpServer {
 	return new SumUpAgentToolkit({
 		apiKey,
@@ -18,7 +26,7 @@ export interface SumUpAgentProps extends Record<string, unknown> {
 	apiKey?: string;
 }
 
-export class SumUpMcpAgent extends McpAgent<Env, never, SumUpAgentProps> {
+export class SumUpMcpAgent extends McpAgent<SumUpEnv, never, SumUpAgentProps> {
 	private _server: McpServer | undefined;
 
 	set server(server: McpServer) {

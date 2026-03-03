@@ -1,0 +1,93 @@
+name: Deploy Docs MCP
+
+on:
+  push:
+    branches:
+      - main
+      - stage
+      - dev
+    paths:
+      - 'apps/docs-mcp/**'
+      - '.github/workflows/deploy-docs-mcp.yaml'
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: deploy-docs-mcp-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: ./apps/docs-mcp
+
+jobs:
+  deploy-live:
+    name: Deploy live
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/docs-mcp/package.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy Worker
+        run: npx wrangler deploy -c wrangler.jsonc --env live
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+  deploy-stage:
+    name: Deploy stage
+    if: github.ref == 'refs/heads/stage'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/docs-mcp/package.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy Worker
+        run: npx wrangler deploy -c wrangler.jsonc --env stage
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+  deploy-dev:
+    name: Deploy dev
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/docs-mcp/package.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy Worker
+        run: npx wrangler deploy -c wrangler.jsonc --env dev
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

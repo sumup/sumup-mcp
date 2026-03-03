@@ -1,4 +1,4 @@
-name: CI
+name: CI Docs MCP
 
 on:
   push:
@@ -6,16 +6,26 @@ on:
       - main
       - stage
       - dev
+    paths:
+      - 'apps/docs-mcp/**'
+      - '.github/workflows/ci-docs-mcp.yaml'
   pull_request:
     branches:
       - main
+    paths:
+      - 'apps/docs-mcp/**'
+      - '.github/workflows/ci-docs-mcp.yaml'
 
 permissions:
   contents: read
 
+defaults:
+  run:
+    working-directory: ./apps/docs-mcp
+
 jobs:
   lint:
-    name: Lint
+    name: Lint and Typecheck
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -24,14 +34,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
-          node-version-file: .nvmrc
+          node-version: '22'
           cache: npm
+          cache-dependency-path: apps/docs-mcp/package.json
 
       - name: Setup Biome CLI
         uses: biomejs/setup-biome@29711cbb52afee00eb13aeb30636592f9edc0088 # v2.7.0
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build
         run: npm run build

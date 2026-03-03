@@ -1,0 +1,49 @@
+{
+	"name": "@sumup/docs-mcp",
+	"version": "0.1.0",
+	"description": "MCP server for searching SumUp developer documentation.",
+	"homepage": "https://github.com/sumup/sumup-mcp",
+	"license": "Apache-2.0",
+	"author": "SumUp <support@sumup.com> (https://sumup.com/)",
+	"scripts": {
+		"generate-types": "wrangler types -c wrangler.jsonc",
+		"build": "tsc --noEmit -p tsconfig.json",
+		"dev": "wrangler dev --local -c wrangler.jsonc",
+		"deploy": "wrangler deploy -c wrangler.jsonc",
+		"typecheck": "tsc --noEmit -p tsconfig.json",
+		"lint": "biome check",
+		"lint:fix": "biome check --write"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/sumup/sumup-mcp.git"
+	},
+	"bugs": {
+		"url": "https://github.com/sumup/sumup-mcp/issues"
+	},
+	"keywords": [
+		"sumup",
+		"docs",
+		"mcp",
+		"mcp-server",
+		"modelcontextprotocol"
+	],
+	"type": "module",
+	"engines": {
+		"node": ">=22"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.26.0",
+		"agents": "^0.2.32",
+		"zod": "^3.25.76"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.14",
+		"@types/node": "^24.10.1",
+		"typescript": "^5.5.4",
+		"wrangler": "^4.64.0"
+	},
+	"optionalDependencies": {
+		"@biomejs/cli-darwin-arm64": "^2.3.14"
+	}
+}
