@@ -1,8 +1,13 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SumUpAgentToolkit } from "@sumup/agent-toolkit/mcp";
 import { McpAgent } from "agents/mcp";
 
-export function createSumUpServer({ apiKey }: { apiKey: string }): McpServer {
+export interface SumUpAgentProps extends Record<string, unknown> {
+	apiKey?: string;
+}
+
+type AgentServer = McpAgent<Env, never, SumUpAgentProps>["server"];
+
+export function createSumUpServer({ apiKey }: { apiKey: string }): AgentServer {
 	return new SumUpAgentToolkit({
 		apiKey,
 		configuration: {
@@ -11,26 +16,11 @@ export function createSumUpServer({ apiKey }: { apiKey: string }): McpServer {
 				tools: {},
 			},
 		},
-	}) as unknown as McpServer;
-}
-
-export interface SumUpAgentProps extends Record<string, unknown> {
-	apiKey?: string;
+	}) as unknown as AgentServer;
 }
 
 export class SumUpMcpAgent extends McpAgent<Env, never, SumUpAgentProps> {
-	private _server: McpServer | undefined;
-
-	set server(server: McpServer) {
-		this._server = server;
-	}
-
-	get server(): McpServer {
-		if (!this._server) {
-			throw new Error("Tried to access MCP server before it was initialized");
-		}
-		return this._server;
-	}
+	server!: AgentServer;
 
 	async init() {
 		const props = this.props;
@@ -48,6 +38,6 @@ export class SumUpMcpAgent extends McpAgent<Env, never, SumUpAgentProps> {
 					tools: {},
 				},
 			},
-		}) as unknown as McpServer;
+		}) as unknown as AgentServer;
 	}
 }
