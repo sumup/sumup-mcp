@@ -63,13 +63,15 @@ export default {
 			return new Response("Not Found", { status: 404 });
 		}
 
-		const apiKey = extractApiKey(request);
-		if (!apiKey) {
-			return unauthorizedResponse();
+		const token = extractApiKey(request);
+		if (!token) {
+			return unauthorizedResponse(
+				new URL("/.well-known/oauth-protected-resource", env.HOST).toString(),
+			);
 		}
 
 		const contextWithProps = ctx as ContextWithProps;
-		contextWithProps.props = { apiKey };
+		contextWithProps.props = { token };
 		if (url.pathname.startsWith(SSE_ROUTE)) {
 			return sseHandler.fetch(request, env, contextWithProps);
 		}
@@ -90,20 +92,22 @@ function extractApiKey(request: Request): string | undefined {
 	return undefined;
 }
 
-function unauthorizedResponse(): Response {
+function unauthorizedResponse(resourceMetadataUrl: string): Response {
 	return new Response(
 		JSON.stringify({
 			jsonrpc: "2.0",
 			error: {
-				code: -32601,
-				message:
-					"Unauthorized: provide a SumUp API key via Authorization header",
+				code: -32010,
+				message: "Authentication required",
 			},
 			id: null,
 		}),
 		{
 			status: 401,
-			headers: { "content-type": "application/json" },
+			headers: {
+				"content-type": "application/json",
+				"www-authenticate": `Bearer realm="mcp", resource_metadata="${resourceMetadataUrl}"`,
+			},
 		},
 	);
 }
