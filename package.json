@@ -10,6 +10,7 @@
 		"build": "tsc --noEmit -p tsconfig.json",
 		"dev": "wrangler dev --local",
 		"deploy": "wrangler deploy",
+		"test": "vitest run",
 		"typecheck": "tsc --noEmit -p tsconfig.json",
 		"lint": "biome check",
 		"lint:fix": "biome check --write",
@@ -38,14 +39,18 @@
 		"node": ">=22"
 	},
 	"dependencies": {
+		"@hono/mcp": "^0.2.4",
 		"@modelcontextprotocol/sdk": "^1.27.1",
-		"@sumup/agent-toolkit": "^0.10.0",
-		"agents": "^0.7.2"
+		"@sumup/agent-toolkit": "^0.11.0",
+		"agents": "^0.7.2",
+		"hono": "^4.12.7",
+		"jose": "^6.1.3"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.5",
 		"@types/node": "^25.3.0",
 		"typescript": "^5.5.4",
+		"vitest": "^3.2.4",
 		"wrangler": "^4.70.0"
 	},
 	"optionalDependencies": {
