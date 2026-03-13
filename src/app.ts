@@ -1,4 +1,3 @@
-import { simpleMcpAuthRouter } from "@hono/mcp";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
@@ -11,6 +10,7 @@ import {
 import {
 	MCP_ROUTE,
 	OPENAI_APPS_CHALLENGE_ROUTE,
+	PROTECTED_RESOURCE_WELL_KNOWN,
 	SCOPES_SUPPORTED,
 	SERVICE_DOCUMENTATION_URL,
 	SSE_ROUTE,
@@ -55,16 +55,13 @@ export function createApp(env: Env): Hono<AppEnv> {
 		}),
 	);
 
-	app.route(
-		"/",
-		simpleMcpAuthRouter({
-			issuer: env.SUMUP_AUTH_HOST,
-			resourceServerUrl: new URL(env.HOST),
-			serviceDocumentationUrl: SERVICE_DOCUMENTATION_URL,
-			scopesSupported: SCOPES_SUPPORTED,
-			resourceName: "SumUp MCP",
-		}),
-	);
+	app.get(PROTECTED_RESOURCE_WELL_KNOWN, (c) => {
+		return c.json(protectedResourceMetadata(env));
+	});
+
+	app.get(`${PROTECTED_RESOURCE_WELL_KNOWN}${MCP_ROUTE}`, (c) => {
+		return c.json(protectedResourceMetadata(env));
+	});
 
 	app.get(OPENAI_APPS_CHALLENGE_ROUTE, (c) => {
 		if (!env.OPENAI_APPS_CHALLENGE) {
@@ -142,4 +139,14 @@ function withProps(
 	const contextWithProps = executionCtx as ContextWithProps;
 	contextWithProps.props = { token };
 	return contextWithProps;
+}
+
+function protectedResourceMetadata(env: Env) {
+	return {
+		resource: new URL(MCP_ROUTE, env.HOST).toString(),
+		authorization_servers: [env.SUMUP_AUTH_HOST],
+		scopes_supported: SCOPES_SUPPORTED,
+		resource_name: "SumUp MCP",
+		resource_documentation: SERVICE_DOCUMENTATION_URL.toString(),
+	};
 }

@@ -117,5 +117,8 @@ describe("auth", () => {
 		expect(response.headers.get("www-authenticate")).toBe(
 			`Bearer realm="mcp", resource_metadata="${resourceMetadataUrl}"`,
 		);
+		expect(resourceMetadataUrl).toBe(
+			"https://mcp-theta.sam-app.ro/.well-known/oauth-protected-resource/mcp",
+		);
 	});
 });

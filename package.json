@@ -39,7 +39,6 @@
 		"node": ">=22"
 	},
 	"dependencies": {
-		"@hono/mcp": "^0.2.4",
 		"@modelcontextprotocol/sdk": "^1.27.1",
 		"@sumup/agent-toolkit": "^0.11.0",
 		"agents": "^0.7.2",

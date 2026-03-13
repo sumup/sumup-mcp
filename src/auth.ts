@@ -75,7 +75,10 @@ export async function validateAccessToken(
  * `WWW-Authenticate` challenges.
  */
 export function protectedResourceMetadataUrl(env: AuthEnv): string {
-	return new URL(PROTECTED_RESOURCE_WELL_KNOWN, env.HOST).toString();
+	return new URL(
+		`${PROTECTED_RESOURCE_WELL_KNOWN}${MCP_ROUTE}`,
+		env.HOST,
+	).toString();
 }
 
 /**
