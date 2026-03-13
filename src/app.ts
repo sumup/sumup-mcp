@@ -152,6 +152,7 @@ function protectedResourceMetadata(env: Env, resourcePath: string) {
 	return {
 		resource: new URL(resourcePath, env.HOST).toString(),
 		authorization_servers: [authorizationServerIssuer(env)],
+		bearer_methods_supported: ["header"],
 		scopes_supported: SCOPES_SUPPORTED,
 		resource_name: "SumUp MCP",
 		resource_documentation: SERVICE_DOCUMENTATION_URL.toString(),

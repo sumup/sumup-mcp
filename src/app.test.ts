@@ -45,6 +45,7 @@ describe("app metadata routes", () => {
 		const expectedMcpMetadata = {
 			resource: "https://mcp-theta.sam-app.ro/mcp",
 			authorization_servers: ["https://auth.sam-app.ro/"],
+			bearer_methods_supported: ["header"],
 			scopes_supported: ["offline_access", "openid", "email"],
 			resource_name: "SumUp MCP",
 			resource_documentation: "https://developer.sumup.com/tools/llms",
