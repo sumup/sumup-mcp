@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 
 import {
+	authorizationServerIssuer,
 	extractBearerToken,
 	protectedResourceMetadataUrl,
 	unauthorizedResponse,
@@ -56,11 +57,15 @@ export function createApp(env: Env): Hono<AppEnv> {
 	);
 
 	app.get(PROTECTED_RESOURCE_WELL_KNOWN, (c) => {
-		return c.json(protectedResourceMetadata(env));
+		return c.json(protectedResourceMetadata(env, MCP_ROUTE));
 	});
 
 	app.get(`${PROTECTED_RESOURCE_WELL_KNOWN}${MCP_ROUTE}`, (c) => {
-		return c.json(protectedResourceMetadata(env));
+		return c.json(protectedResourceMetadata(env, MCP_ROUTE));
+	});
+
+	app.get(`${PROTECTED_RESOURCE_WELL_KNOWN}${SSE_ROUTE}`, (c) => {
+		return c.json(protectedResourceMetadata(env, SSE_ROUTE));
 	});
 
 	app.get(OPENAI_APPS_CHALLENGE_ROUTE, (c) => {
@@ -72,7 +77,7 @@ export function createApp(env: Env): Hono<AppEnv> {
 	});
 
 	app.use(MCP_ROUTE, async (c, next) => {
-		const resourceMetadataUrl = protectedResourceMetadataUrl(env);
+		const resourceMetadataUrl = protectedResourceMetadataUrl(env, MCP_ROUTE);
 		const token = extractBearerToken(c.req.raw);
 		if (!token) {
 			return unauthorizedResponse(resourceMetadataUrl);
@@ -82,6 +87,7 @@ export function createApp(env: Env): Hono<AppEnv> {
 			env,
 			token,
 			resourceMetadataUrl,
+			MCP_ROUTE,
 		);
 		if ("response" in validation) {
 			return validation.response;
@@ -92,7 +98,7 @@ export function createApp(env: Env): Hono<AppEnv> {
 	});
 
 	app.use(SSE_ROUTE, async (c, next) => {
-		const resourceMetadataUrl = protectedResourceMetadataUrl(env);
+		const resourceMetadataUrl = protectedResourceMetadataUrl(env, SSE_ROUTE);
 		const token = extractBearerToken(c.req.raw);
 		if (!token) {
 			return unauthorizedResponse(resourceMetadataUrl);
@@ -102,6 +108,7 @@ export function createApp(env: Env): Hono<AppEnv> {
 			env,
 			token,
 			resourceMetadataUrl,
+			SSE_ROUTE,
 		);
 		if ("response" in validation) {
 			return validation.response;
@@ -141,10 +148,10 @@ function withProps(
 	return contextWithProps;
 }
 
-function protectedResourceMetadata(env: Env) {
+function protectedResourceMetadata(env: Env, resourcePath: string) {
 	return {
-		resource: new URL(MCP_ROUTE, env.HOST).toString(),
-		authorization_servers: [env.SUMUP_AUTH_HOST],
+		resource: new URL(resourcePath, env.HOST).toString(),
+		authorization_servers: [authorizationServerIssuer(env)],
 		scopes_supported: SCOPES_SUPPORTED,
 		resource_name: "SumUp MCP",
 		resource_documentation: SERVICE_DOCUMENTATION_URL.toString(),

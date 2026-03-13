@@ -1,7 +1,7 @@
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 
-import { MCP_ROUTE, PROTECTED_RESOURCE_WELL_KNOWN } from "./config";
+import { PROTECTED_RESOURCE_WELL_KNOWN } from "./config";
 import { protocolErrorResponse } from "./protocol";
 
 // Reuse one remote JWKS resolver per URL so jose can keep its own fetch/cache
@@ -66,19 +66,27 @@ export async function validateAccessToken(
 	env: AuthEnv,
 	token: string,
 	resourceMetadataUrl: string,
+	resourcePath: string,
 ): Promise<AccessTokenValidationResult> {
-	return validateJWTAccessToken(env, token, resourceMetadataUrl);
+	return validateJWTAccessToken(env, token, resourceMetadataUrl, resourcePath);
 }
 
 /**
  * Computes the protected resource metadata URL advertised in
  * `WWW-Authenticate` challenges.
  */
-export function protectedResourceMetadataUrl(env: AuthEnv): string {
+export function protectedResourceMetadataUrl(
+	env: AuthEnv,
+	resourcePath: string,
+): string {
 	return new URL(
-		`${PROTECTED_RESOURCE_WELL_KNOWN}${MCP_ROUTE}`,
+		`${PROTECTED_RESOURCE_WELL_KNOWN}${resourcePath}`,
 		env.HOST,
 	).toString();
+}
+
+export function authorizationServerIssuer(env: AuthEnv): string {
+	return new URL("/", env.SUMUP_AUTH_HOST).toString();
 }
 
 /**
@@ -90,16 +98,15 @@ async function validateJWTAccessToken(
 	env: AuthEnv,
 	token: string,
 	resourceMetadataUrl: string,
+	resourcePath: string,
 ): Promise<AccessTokenValidationResult> {
 	try {
-		const resourceUrl = resourceFromMetadataUrl(resourceMetadataUrl);
+		const resourceUrl = resourceUrlForPath(env, resourcePath);
+		const issuer = authorizationServerIssuer(env);
 		const payload = await defaultVerifyJwt(token, {
-			issuer: env.SUMUP_AUTH_HOST,
+			issuer,
 			audience: [resourceUrl, env.HOST],
-			jwksUrl: new URL(
-				"/.well-known/jwks.json",
-				env.SUMUP_AUTH_HOST,
-			).toString(),
+			jwksUrl: new URL("/.well-known/jwks.json", issuer).toString(),
 		});
 		return {
 			authInfo: buildAuthInfo(token, new URL(resourceUrl), payload),
@@ -164,13 +171,8 @@ function defaultAuthenticateHeader(
 	return `Bearer realm="mcp", error="invalid_token", resource_metadata="${resourceMetadataUrl}"`;
 }
 
-// Reconstructs the protected resource URL from the advertised metadata URL.
-function resourceFromMetadataUrl(resourceMetadataUrl: string): string {
-	const resource = new URL(resourceMetadataUrl);
-	resource.pathname = MCP_ROUTE;
-	resource.search = "";
-	resource.hash = "";
-	return resource.toString();
+function resourceUrlForPath(env: AuthEnv, resourcePath: string): string {
+	return new URL(resourcePath, env.HOST).toString();
 }
 
 function buildAuthInfo(

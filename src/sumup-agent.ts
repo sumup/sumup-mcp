@@ -23,7 +23,7 @@ export class SumUpMcpAgent extends McpAgent<Env, never, SumUpAgentProps> {
 			apiKey: props.token,
 			host: this.env.SUMUP_API_HOST,
 			resource: new URL(MCP_ROUTE, this.env.HOST).toString(),
-			resourceMetadata: protectedResourceMetadataUrl(this.env),
+			resourceMetadata: protectedResourceMetadataUrl(this.env, MCP_ROUTE),
 			configuration: {
 				capabilities: {
 					resources: {},
