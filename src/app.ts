@@ -59,7 +59,7 @@ export function createApp(env: Env): Hono<AppEnv> {
 		"/",
 		simpleMcpAuthRouter({
 			issuer: env.SUMUP_AUTH_HOST,
-			resourceServerUrl: new URL(MCP_ROUTE, env.HOST),
+			resourceServerUrl: new URL(env.HOST),
 			serviceDocumentationUrl: SERVICE_DOCUMENTATION_URL,
 			scopesSupported: SCOPES_SUPPORTED,
 			resourceName: "SumUp MCP",
