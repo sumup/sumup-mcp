@@ -1,113 +1,11 @@
-import { type SumUpAgentProps, SumUpMcpAgent } from "./sumup-agent";
+import { createApp } from "./app";
 
-const MCP_ROUTE = "/mcp";
-const SSE_ROUTE = "/sse";
+export { SumUpMcpAgent } from "./sumup-agent";
 
-const mcpHandler = SumUpMcpAgent.serve(MCP_ROUTE, {
-	binding: "SUMUP_MCP_AGENT",
-});
-
-const sseHandler = SumUpMcpAgent.serveSSE(SSE_ROUTE, {
-	binding: "SUMUP_MCP_AGENT",
-});
-
-const CORS_HEADERS = {
-	"Access-Control-Allow-Origin": "*",
-	"Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
-	"Access-Control-Allow-Headers":
-		"Content-Type, Accept, Authorization, mcp-session-id, MCP-Protocol-Version",
-	"Access-Control-Max-Age": "86400",
-};
-
-type ContextWithProps = ExecutionContext & { props?: SumUpAgentProps };
-
-export default {
-	async fetch(
-		request: Request,
-		env: Env,
-		ctx: ExecutionContext,
-	): Promise<Response> {
-		if (request.method === "OPTIONS") {
-			return new Response(null, {
-				headers: CORS_HEADERS,
-			});
-		}
-
-		const url = new URL(request.url);
-
-		if (
-			request.method === "GET" &&
-			url.pathname === "/.well-known/oauth-protected-resource"
-		) {
-			return Response.json({
-				resource: env.HOST,
-				resource_name: "SumUp MCP",
-				resource_documentation: "https://developer.sumup.com/tools/llms",
-				authorization_servers: [env.SUMUP_AUTH_HOST],
-				scopes_supported: ["offline_access", "openid", "email"],
-				bearer_methods_supported: ["header"],
-			});
-		}
-
-		if (
-			request.method === "GET" &&
-			url.pathname === "/.well-known/openai-apps-challenge" &&
-			env.OPENAI_APPS_CHALLENGE
-		) {
-			return new Response(env.OPENAI_APPS_CHALLENGE, {
-				headers: { "Content-Type": "text/plain" },
-			});
-		}
-
-		if (url.pathname !== MCP_ROUTE && url.pathname !== SSE_ROUTE) {
-			return new Response("Not Found", { status: 404 });
-		}
-
-		const token = extractApiKey(request);
-		if (!token) {
-			return unauthorizedResponse(
-				new URL("/.well-known/oauth-protected-resource", env.HOST).toString(),
-			);
-		}
-
-		const contextWithProps = ctx as ContextWithProps;
-		contextWithProps.props = { token };
-		if (url.pathname.startsWith(SSE_ROUTE)) {
-			return sseHandler.fetch(request, env, contextWithProps);
-		}
-		return mcpHandler.fetch(request, env, contextWithProps);
+const app = {
+	fetch(request: Request, env: Env, executionCtx: ExecutionContext) {
+		return createApp(env).fetch(request, env, executionCtx);
 	},
 };
 
-export { SumUpMcpAgent };
-
-function extractApiKey(request: Request): string | undefined {
-	const auth = request.headers.get("authorization");
-	if (auth) {
-		const [scheme, token] = auth.split(" ");
-		if (scheme?.toLowerCase() === "bearer" && token?.length) {
-			return token.trim();
-		}
-	}
-	return undefined;
-}
-
-function unauthorizedResponse(resourceMetadataUrl: string): Response {
-	return new Response(
-		JSON.stringify({
-			jsonrpc: "2.0",
-			error: {
-				code: -32010,
-				message: "Authentication required",
-			},
-			id: null,
-		}),
-		{
-			status: 401,
-			headers: {
-				"content-type": "application/json",
-				"www-authenticate": `Bearer realm="mcp", resource_metadata="${resourceMetadataUrl}"`,
-			},
-		},
-	);
-}
+export default app;
