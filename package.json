@@ -50,7 +50,7 @@
 		"@types/node": "^25.3.0",
 		"typescript": "^5.5.4",
 		"vitest": "^3.2.4",
-		"wrangler": "^4.70.0"
+		"wrangler": "^4.71.0"
 	},
 	"optionalDependencies": {
 		"@biomejs/cli-darwin-arm64": "^2.4.5"
