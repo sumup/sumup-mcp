@@ -43,7 +43,7 @@
 		"@sumup/agent-toolkit": "^0.11.0",
 		"agents": "^0.7.2",
 		"hono": "^4.12.7",
-		"jose": "^6.1.3"
+		"jose": "^6.2.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.6",
