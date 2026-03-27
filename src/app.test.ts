@@ -1,4 +1,6 @@
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import type { AddressInfo } from "node:net";
+
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 vi.mock("./sumup-agent", () => ({
 	SumUpMcpAgent: {
@@ -22,21 +24,41 @@ const env = {
 } as Env;
 
 describe("app metadata routes", () => {
+	const servers: Array<{ close: (cb: (err?: Error) => void) => void }> = [];
+
+	afterEach(async () => {
+		await Promise.all(
+			servers.splice(0).map(
+				(server) =>
+					new Promise<void>((resolve, reject) => {
+						server.close((error) => {
+							if (error) {
+								reject(error);
+								return;
+							}
+
+							resolve();
+						});
+					}),
+			),
+		);
+	});
+
 	beforeEach(() => {
 		vi.restoreAllMocks();
 	});
 
 	test("serves protected resource metadata on both well-known paths", async () => {
-		const app = createApp(env);
+		const baseUrl = await startServer();
 
-		const legacyResponse = await app.request(
-			"https://mcp-theta.sam-app.ro/.well-known/oauth-protected-resource",
+		const legacyResponse = await fetch(
+			`${baseUrl}/.well-known/oauth-protected-resource`,
 		);
-		const scopedResponse = await app.request(
-			"https://mcp-theta.sam-app.ro/.well-known/oauth-protected-resource/mcp",
+		const scopedResponse = await fetch(
+			`${baseUrl}/.well-known/oauth-protected-resource/mcp`,
 		);
-		const sseResponse = await app.request(
-			"https://mcp-theta.sam-app.ro/.well-known/oauth-protected-resource/sse",
+		const sseResponse = await fetch(
+			`${baseUrl}/.well-known/oauth-protected-resource/sse`,
 		);
 
 		expect(legacyResponse.status).toBe(200);
@@ -61,10 +83,22 @@ describe("app metadata routes", () => {
 	});
 
 	test("does not expose worker-local authorization server metadata", async () => {
-		const response = await createApp(env).request(
-			"https://mcp-theta.sam-app.ro/.well-known/oauth-authorization-server",
+		const baseUrl = await startServer();
+		const response = await fetch(
+			`${baseUrl}/.well-known/oauth-authorization-server`,
 		);
 
 		expect(response.status).toBe(404);
 	});
+
+	async function startServer() {
+		const server = createApp(env).listen(0);
+		servers.push(server);
+		await new Promise<void>((resolve) => {
+			server.once("listening", resolve);
+		});
+
+		const address = server.address() as AddressInfo;
+		return `http://127.0.0.1:${address.port}`;
+	}
 });

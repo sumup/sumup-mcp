@@ -1,8 +1,14 @@
+import type { OAuthTokenVerifier } from "@modelcontextprotocol/sdk/server/auth/provider.js";
+import { getOAuthProtectedResourceMetadataUrl } from "@modelcontextprotocol/sdk/server/auth/router.js";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
+import type { OAuthProtectedResourceMetadata } from "@modelcontextprotocol/sdk/shared/auth.js";
+import {
+	checkResourceAllowed,
+	resourceUrlFromServerUrl,
+} from "@modelcontextprotocol/sdk/shared/auth-utils.js";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 
-import { PROTECTED_RESOURCE_WELL_KNOWN, SCOPES_SUPPORTED } from "./config";
-import { protocolErrorResponse } from "./protocol";
+import { SCOPES_SUPPORTED, SERVICE_DOCUMENTATION_URL } from "./config";
 
 // Reuse one remote JWKS resolver per URL so jose can keep its own fetch/cache
 // state across token verifications instead of rebuilding it on every request.
@@ -16,61 +22,15 @@ export interface AuthEnv {
 	SUMUP_AUTH_HOST: string;
 }
 
-export type AccessTokenValidationResult =
-	| {
-			authInfo: AuthInfo;
-	  }
-	| {
-			response: Response;
-	  };
+export class SumUpOAuthTokenVerifier implements OAuthTokenVerifier {
+	constructor(
+		private readonly env: AuthEnv,
+		private readonly resourcePath: string,
+	) {}
 
-/**
- * Extracts a bearer token from the request Authorization header.
- *
- * The worker accepts OAuth2 bearer access tokens encoded as JWTs.
- */
-export function extractBearerToken(request: Request): string | undefined {
-	const auth = request.headers.get("authorization");
-	if (!auth) {
-		return undefined;
+	verifyAccessToken(token: string): Promise<AuthInfo> {
+		return verifyAccessToken(this.env, token, this.resourcePath);
 	}
-
-	const [scheme, token] = auth.split(" ");
-	if (scheme?.toLowerCase() !== "bearer" || !token?.length) {
-		return undefined;
-	}
-
-	return token.trim();
-}
-
-/**
- * Builds the initial authentication challenge returned when no bearer token
- * was supplied with the MCP request.
- */
-export function unauthorizedResponse(resourceMetadataUrl: string): Response {
-	return authenticationRequiredResponse(resourceMetadataUrl);
-}
-
-function authenticationRequiredResponse(resourceMetadataUrl: string): Response {
-	const scope = SCOPES_SUPPORTED.join(" ");
-
-	return protocolErrorResponse(401, "Authentication required", {
-		"www-authenticate": `Bearer realm="mcp", scope="${scope}", resource_metadata="${resourceMetadataUrl}"`,
-	});
-}
-
-/**
- * Validates bearer credentials for MCP transport requests.
- *
- * Access tokens are verified locally against the authorization server's JWKS.
- */
-export async function validateAccessToken(
-	env: AuthEnv,
-	token: string,
-	resourceMetadataUrl: string,
-	resourcePath: string,
-): Promise<AccessTokenValidationResult> {
-	return validateJWTAccessToken(env, token, resourceMetadataUrl, resourcePath);
 }
 
 /**
@@ -81,14 +41,27 @@ export function protectedResourceMetadataUrl(
 	env: AuthEnv,
 	resourcePath: string,
 ): string {
-	return new URL(
-		`${PROTECTED_RESOURCE_WELL_KNOWN}${resourcePath}`,
-		env.HOST,
-	).toString();
+	return getOAuthProtectedResourceMetadataUrl(new URL(resourcePath, env.HOST));
 }
 
 export function authorizationServerIssuer(env: AuthEnv): string {
 	return new URL("/", env.SUMUP_AUTH_HOST).toString();
+}
+
+export function protectedResourceMetadata(
+	env: AuthEnv,
+	resourcePath: string,
+): OAuthProtectedResourceMetadata {
+	return {
+		resource: resourceUrlFromServerUrl(
+			new URL(resourcePath, env.HOST),
+		).toString(),
+		authorization_servers: [authorizationServerIssuer(env)],
+		bearer_methods_supported: ["header"],
+		scopes_supported: SCOPES_SUPPORTED,
+		resource_name: "SumUp MCP",
+		resource_documentation: SERVICE_DOCUMENTATION_URL.toString(),
+	};
 }
 
 /**
@@ -96,30 +69,21 @@ export function authorizationServerIssuer(env: AuthEnv): string {
  *
  * JWT validation is the only bearer validation mode supported by the worker.
  */
-async function validateJWTAccessToken(
+export async function verifyAccessToken(
 	env: AuthEnv,
 	token: string,
-	resourceMetadataUrl: string,
 	resourcePath: string,
-): Promise<AccessTokenValidationResult> {
-	try {
-		const resourceUrl = resourceUrlForPath(env, resourcePath);
-		const issuer = authorizationServerIssuer(env);
-		const payload = await defaultVerifyJwt(token, {
-			issuer,
-			audience: [resourceUrl, env.HOST],
-			jwksUrl: new URL("/.well-known/jwks.json", issuer).toString(),
-		});
-		return {
-			authInfo: buildAuthInfo(token, new URL(resourceUrl), payload),
-		};
-	} catch {
-		return {
-			response: invalidAccessTokenResponse(
-				defaultAuthenticateHeader(401, resourceMetadataUrl),
-			),
-		};
-	}
+): Promise<AuthInfo> {
+	const resourceUrl = resourceUrlForPath(env, resourcePath);
+	const issuer = authorizationServerIssuer(env);
+	const payload = await defaultVerifyJwt(token, {
+		issuer,
+		audience: [resourceUrl, env.HOST],
+		jwksUrl: new URL("/.well-known/jwks.json", issuer).toString(),
+	});
+
+	validateAudience(resourceUrl, payload);
+	return buildAuthInfo(token, resourceUrlFromServerUrl(resourceUrl), payload);
 }
 
 /**
@@ -149,30 +113,6 @@ function remoteJwks(jwksUrl: string): ReturnType<typeof createRemoteJWKSet> {
 	const jwks = createRemoteJWKSet(new URL(jwksUrl));
 	remoteJwksCache.set(jwksUrl, jwks);
 	return jwks;
-}
-
-/**
- * Returns a transport-level `401 invalid_token` response for failed bearer
- * validation.
- */
-export function invalidAccessTokenResponse(wwwAuthenticate: string): Response {
-	return protocolErrorResponse(401, "Invalid access token", {
-		"www-authenticate": wwwAuthenticate,
-	});
-}
-
-// Returns the fallback RFC 6750 challenge used for bearer token failures.
-function defaultAuthenticateHeader(
-	status: number,
-	resourceMetadataUrl: string,
-): string {
-	const scope = SCOPES_SUPPORTED.join(" ");
-
-	if (status === 403) {
-		return `Bearer realm="mcp", error="insufficient_scope", scope="${scope}", resource_metadata="${resourceMetadataUrl}"`;
-	}
-
-	return `Bearer realm="mcp", error="invalid_token", scope="${scope}", resource_metadata="${resourceMetadataUrl}"`;
 }
 
 function resourceUrlForPath(env: AuthEnv, resourcePath: string): string {
@@ -209,6 +149,47 @@ function parseScopes(claims: Record<string, unknown>): string[] {
 	const scopes = claims.scopes;
 	if (Array.isArray(scopes)) {
 		return scopes.filter((value): value is string => typeof value === "string");
+	}
+
+	const scp = claims.scp;
+	if (Array.isArray(scp)) {
+		return scp.filter((value): value is string => typeof value === "string");
+	}
+
+	return [];
+}
+
+function validateAudience(
+	configuredResource: string,
+	claims: Record<string, unknown>,
+): void {
+	const audiences = audienceClaims(claims);
+	if (audiences.length === 0) {
+		return;
+	}
+
+	const allowed = audiences.some((audience) =>
+		checkResourceAllowed({
+			requestedResource: audience,
+			configuredResource,
+		}),
+	);
+
+	if (!allowed) {
+		throw new Error(
+			"Access token audience does not match the protected resource",
+		);
+	}
+}
+
+function audienceClaims(claims: Record<string, unknown>): string[] {
+	const aud = claims.aud;
+	if (typeof aud === "string") {
+		return [aud];
+	}
+
+	if (Array.isArray(aud)) {
+		return aud.filter((value): value is string => typeof value === "string");
 	}
 
 	return [];
