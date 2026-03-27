@@ -9,15 +9,12 @@ import type {
 	NextFunction,
 } from "express";
 
-import {
-	protectedResourceMetadata,
-	protectedResourceMetadataUrl,
-	SumUpOAuthTokenVerifier,
-} from "./auth";
+import { protectedResourceMetadata, SumUpOAuthTokenVerifier } from "./auth";
 import {
 	MCP_ROUTE,
 	OPENAI_APPS_CHALLENGE_ROUTE,
 	PROTECTED_RESOURCE_WELL_KNOWN,
+	SCOPES_SUPPORTED,
 	SSE_ROUTE,
 } from "./config";
 import { protocolErrorResponse } from "./protocol";
@@ -33,6 +30,8 @@ const sseHandler = SumUpMcpAgent.serveSSE(SSE_ROUTE, {
 	binding: "SUMUP_MCP_AGENT",
 });
 
+const PROTECTED_RESOURCE_METADATA_URL = `${PROTECTED_RESOURCE_WELL_KNOWN}`;
+
 export function createApp(env: Env): Express {
 	const app = createMcpExpressApp({
 		host: new URL(env.HOST).hostname,
@@ -41,15 +40,15 @@ export function createApp(env: Env): Express {
 	app.use(setCorsHeaders);
 
 	app.get(PROTECTED_RESOURCE_WELL_KNOWN, (_req, res) => {
-		res.json(protectedResourceMetadata(env, MCP_ROUTE));
+		res.json(protectedResourceMetadata(env));
 	});
 
 	app.get(`${PROTECTED_RESOURCE_WELL_KNOWN}${MCP_ROUTE}`, (_req, res) => {
-		res.json(protectedResourceMetadata(env, MCP_ROUTE));
+		res.json(protectedResourceMetadata(env));
 	});
 
 	app.get(`${PROTECTED_RESOURCE_WELL_KNOWN}${SSE_ROUTE}`, (_req, res) => {
-		res.json(protectedResourceMetadata(env, SSE_ROUTE));
+		res.json(protectedResourceMetadata(env));
 	});
 
 	app.get(OPENAI_APPS_CHALLENGE_ROUTE, (_req, res) => {
@@ -104,8 +103,12 @@ function mountProtectedFetchRoute(
 	app.all(
 		route,
 		requireBearerAuth({
-			verifier: new SumUpOAuthTokenVerifier(env, route),
-			resourceMetadataUrl: protectedResourceMetadataUrl(env, route),
+			verifier: new SumUpOAuthTokenVerifier(env),
+			requiredScopes: SCOPES_SUPPORTED,
+			resourceMetadataUrl: new URL(
+				PROTECTED_RESOURCE_METADATA_URL,
+				env.HOST,
+			).toString(),
 		}),
 		async (req, res, next) => {
 			try {

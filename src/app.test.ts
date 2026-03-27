@@ -65,21 +65,17 @@ describe("app metadata routes", () => {
 		expect(scopedResponse.status).toBe(200);
 		expect(sseResponse.status).toBe(200);
 		const expectedMcpMetadata = {
-			resource: "https://mcp-theta.sam-app.ro/mcp",
+			resource: "https://mcp-theta.sam-app.ro",
 			authorization_servers: ["https://auth.sam-app.ro/"],
 			bearer_methods_supported: ["header"],
 			scopes_supported: ["offline_access", "email"],
 			resource_name: "SumUp MCP",
 			resource_documentation: "https://developer.sumup.com/tools/llms",
 		};
-		const expectedSseMetadata = {
-			...expectedMcpMetadata,
-			resource: "https://mcp-theta.sam-app.ro/sse",
-		};
 
 		expect(await legacyResponse.json()).toEqual(expectedMcpMetadata);
 		expect(await scopedResponse.json()).toEqual(expectedMcpMetadata);
-		expect(await sseResponse.json()).toEqual(expectedSseMetadata);
+		expect(await sseResponse.json()).toEqual(expectedMcpMetadata);
 	});
 
 	test("does not expose worker-local authorization server metadata", async () => {
@@ -89,6 +85,27 @@ describe("app metadata routes", () => {
 		);
 
 		expect(response.status).toBe(404);
+	});
+
+	test("challenges unauthenticated MCP requests with required scopes", async () => {
+		const baseUrl = await startServer();
+		const response = await fetch(`${baseUrl}/mcp`, {
+			method: "POST",
+			headers: {
+				"content-type": "application/json",
+			},
+			body: JSON.stringify({
+				jsonrpc: "2.0",
+				id: "1",
+				method: "initialize",
+				params: {},
+			}),
+		});
+
+		expect(response.status).toBe(401);
+		expect(response.headers.get("www-authenticate")).toBe(
+			'Bearer error="invalid_token", error_description="Missing Authorization header", scope="offline_access email", resource_metadata="https://mcp-theta.sam-app.ro/.well-known/oauth-protected-resource"',
+		);
 	});
 
 	async function startServer() {

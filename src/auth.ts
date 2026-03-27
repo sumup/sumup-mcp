@@ -1,11 +1,7 @@
 import type { OAuthTokenVerifier } from "@modelcontextprotocol/sdk/server/auth/provider.js";
-import { getOAuthProtectedResourceMetadataUrl } from "@modelcontextprotocol/sdk/server/auth/router.js";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import type { OAuthProtectedResourceMetadata } from "@modelcontextprotocol/sdk/shared/auth.js";
-import {
-	checkResourceAllowed,
-	resourceUrlFromServerUrl,
-} from "@modelcontextprotocol/sdk/shared/auth-utils.js";
+import { checkResourceAllowed } from "@modelcontextprotocol/sdk/shared/auth-utils.js";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 
 import { SCOPES_SUPPORTED, SERVICE_DOCUMENTATION_URL } from "./config";
@@ -23,40 +19,19 @@ export interface AuthEnv {
 }
 
 export class SumUpOAuthTokenVerifier implements OAuthTokenVerifier {
-	constructor(
-		private readonly env: AuthEnv,
-		private readonly resourcePath: string,
-	) {}
+	constructor(private readonly env: AuthEnv) {}
 
 	verifyAccessToken(token: string): Promise<AuthInfo> {
-		return verifyAccessToken(this.env, token, this.resourcePath);
+		return verifyAccessToken(this.env, token);
 	}
-}
-
-/**
- * Computes the protected resource metadata URL advertised in
- * `WWW-Authenticate` challenges.
- */
-export function protectedResourceMetadataUrl(
-	env: AuthEnv,
-	resourcePath: string,
-): string {
-	return getOAuthProtectedResourceMetadataUrl(new URL(resourcePath, env.HOST));
-}
-
-export function authorizationServerIssuer(env: AuthEnv): string {
-	return new URL("/", env.SUMUP_AUTH_HOST).toString();
 }
 
 export function protectedResourceMetadata(
 	env: AuthEnv,
-	resourcePath: string,
 ): OAuthProtectedResourceMetadata {
 	return {
-		resource: resourceUrlFromServerUrl(
-			new URL(resourcePath, env.HOST),
-		).toString(),
-		authorization_servers: [authorizationServerIssuer(env)],
+		resource: env.HOST,
+		authorization_servers: [canonicalAuthorizationServer(env)],
 		bearer_methods_supported: ["header"],
 		scopes_supported: SCOPES_SUPPORTED,
 		resource_name: "SumUp MCP",
@@ -72,18 +47,17 @@ export function protectedResourceMetadata(
 export async function verifyAccessToken(
 	env: AuthEnv,
 	token: string,
-	resourcePath: string,
 ): Promise<AuthInfo> {
-	const resourceUrl = resourceUrlForPath(env, resourcePath);
-	const issuer = authorizationServerIssuer(env);
+	const resourceUrl = env.HOST;
+	const issuer = canonicalAuthorizationServer(env);
 	const payload = await defaultVerifyJwt(token, {
 		issuer,
-		audience: [resourceUrl, env.HOST],
+		audience: [resourceUrl, new URL("/", env.HOST).toString()],
 		jwksUrl: new URL("/.well-known/jwks.json", issuer).toString(),
 	});
 
 	validateAudience(resourceUrl, payload);
-	return buildAuthInfo(token, resourceUrlFromServerUrl(resourceUrl), payload);
+	return buildAuthInfo(token, payload);
 }
 
 /**
@@ -115,13 +89,12 @@ function remoteJwks(jwksUrl: string): ReturnType<typeof createRemoteJWKSet> {
 	return jwks;
 }
 
-function resourceUrlForPath(env: AuthEnv, resourcePath: string): string {
-	return new URL(resourcePath, env.HOST).toString();
+function canonicalAuthorizationServer(env: AuthEnv): string {
+	return new URL("/", env.SUMUP_AUTH_HOST).toString();
 }
 
 function buildAuthInfo(
 	token: string,
-	resource: URL,
 	claims: Record<string, unknown>,
 ): AuthInfo {
 	const scopes = parseScopes(claims);
@@ -135,7 +108,6 @@ function buildAuthInfo(
 			"sumup-mcp",
 		scopes,
 		expiresAt: numberClaim(claims, "exp"),
-		resource,
 		extra: subject ? { subject } : undefined,
 	};
 }
