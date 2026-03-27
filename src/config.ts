@@ -13,7 +13,7 @@ export const CORS_HEADERS = {
 	"Access-Control-Max-Age": "86400",
 };
 
-export const SCOPES_SUPPORTED = ["offline_access", "openid", "email"];
+export const SCOPES_SUPPORTED = ["offline_access", "email"];
 export const SERVICE_DOCUMENTATION_URL = new URL(
 	"https://developer.sumup.com/tools/llms",
 );

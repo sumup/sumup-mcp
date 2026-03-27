@@ -32,7 +32,7 @@ describe("auth", () => {
 			payload: {
 				sub: "user-456",
 				azp: "client-123",
-				scope: "payments:read openid",
+				scope: "payments:read",
 				exp: 1234567890,
 			},
 		});
@@ -48,7 +48,6 @@ describe("auth", () => {
 		expect("authInfo" in result && result.authInfo.clientId).toBe("client-123");
 		expect("authInfo" in result && result.authInfo.scopes).toEqual([
 			"payments:read",
-			"openid",
 		]);
 		expect("authInfo" in result && result.authInfo.extra).toEqual({
 			subject: "user-456",
@@ -112,7 +111,7 @@ describe("auth", () => {
 		expect(
 			"response" in result && result.response.headers.get("www-authenticate"),
 		).toBe(
-			`Bearer realm="mcp", error="invalid_token", scope="offline_access openid email", resource_metadata="${resourceMetadataUrl}"`,
+			`Bearer realm="mcp", error="invalid_token", scope="offline_access email", resource_metadata="${resourceMetadataUrl}"`,
 		);
 	});
 
@@ -122,7 +121,7 @@ describe("auth", () => {
 
 		expect(response.status).toBe(401);
 		expect(response.headers.get("www-authenticate")).toBe(
-			`Bearer realm="mcp", scope="offline_access openid email", resource_metadata="${resourceMetadataUrl}"`,
+			`Bearer realm="mcp", scope="offline_access email", resource_metadata="${resourceMetadataUrl}"`,
 		);
 		expect(resourceMetadataUrl).toBe(
 			"https://mcp-theta.sam-app.ro/.well-known/oauth-protected-resource/mcp",
