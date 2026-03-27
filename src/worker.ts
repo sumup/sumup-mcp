@@ -1,11 +1,11 @@
+import { httpServerHandler } from "cloudflare:node";
+import { env } from "cloudflare:workers";
 import { createApp } from "./app";
 
 export { SumUpMcpAgent } from "./sumup-agent";
 
-const app = {
-	fetch(request: Request, env: Env, executionCtx: ExecutionContext) {
-		return createApp(env).fetch(request, env, executionCtx);
-	},
-};
+const PORT = 3000;
 
-export default app;
+createApp(env as Env).listen(PORT);
+
+export default httpServerHandler({ port: PORT });

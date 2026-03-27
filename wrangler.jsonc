@@ -6,7 +6,7 @@
 	"workers_dev": true,
 	"preview_urls": true,
 	"upload_source_maps": true,
-	"compatibility_flags": ["nodejs_compat"],
+	"compatibility_flags": ["nodejs_compat", "enable_nodejs_http_server_modules"],
 	"observability": {
 		"enabled": true
 	},

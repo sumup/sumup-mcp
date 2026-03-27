@@ -12,9 +12,9 @@ vi.mock("jose", () => ({
 
 import {
 	authorizationServerIssuer,
+	protectedResourceMetadata,
 	protectedResourceMetadataUrl,
-	unauthorizedResponse,
-	validateAccessToken,
+	verifyAccessToken,
 } from "./auth";
 
 const env = {
@@ -36,22 +36,20 @@ describe("auth", () => {
 				exp: 1234567890,
 			},
 		});
-		const resourceMetadataUrl = protectedResourceMetadataUrl(env, "/mcp");
-
-		const result = await validateAccessToken(
+		const result = await verifyAccessToken(
 			env,
 			"header.payload.signature",
-			resourceMetadataUrl,
 			"/mcp",
 		);
 
-		expect("authInfo" in result && result.authInfo.clientId).toBe("client-123");
-		expect("authInfo" in result && result.authInfo.scopes).toEqual([
-			"payments:read",
-		]);
-		expect("authInfo" in result && result.authInfo.extra).toEqual({
+		expect(result.clientId).toBe("client-123");
+		expect(result.scopes).toEqual(["payments:read"]);
+		expect(result.extra).toEqual({
 			subject: "user-456",
 		});
+		expect(result.resource?.toString()).toBe(
+			"https://mcp-theta.sam-app.ro/mcp",
+		);
 		expect(createRemoteJWKSetMock).toHaveBeenCalledWith(
 			new URL("https://auth.sam-app.ro/.well-known/jwks.json"),
 		);
@@ -75,20 +73,8 @@ describe("auth", () => {
 			HOST: "https://mcp-beta.sam-app.ro",
 			SUMUP_AUTH_HOST: "https://auth-beta.sam-app.ro",
 		};
-		const resourceMetadataUrl = protectedResourceMetadataUrl(cachedEnv, "/mcp");
-
-		await validateAccessToken(
-			cachedEnv,
-			"header.payload.signature",
-			resourceMetadataUrl,
-			"/mcp",
-		);
-		await validateAccessToken(
-			cachedEnv,
-			"header.payload.signature",
-			resourceMetadataUrl,
-			"/mcp",
-		);
+		await verifyAccessToken(cachedEnv, "header.payload.signature", "/mcp");
+		await verifyAccessToken(cachedEnv, "header.payload.signature", "/mcp");
 
 		expect(createRemoteJWKSetMock).toHaveBeenCalledTimes(1);
 		expect(createRemoteJWKSetMock).toHaveBeenCalledWith(
@@ -96,36 +82,29 @@ describe("auth", () => {
 		);
 	});
 
-	test("returns 401 challenge when JWT verification fails", async () => {
+	test("throws when JWT verification fails", async () => {
 		jwtVerifyMock.mockRejectedValue(new Error("bad token"));
-		const resourceMetadataUrl = protectedResourceMetadataUrl(env, "/mcp");
+		await expect(
+			verifyAccessToken(env, "header.payload.signature", "/mcp"),
+		).rejects.toThrow("bad token");
+	});
 
-		const result = await validateAccessToken(
+	test("accepts ext-authz style scp claims", async () => {
+		jwtVerifyMock.mockResolvedValue({
+			payload: {
+				sub: "user-456",
+				client_id: "client-123",
+				scp: ["email", "offline_access"],
+				exp: 1234567890,
+			},
+		});
+		const result = await verifyAccessToken(
 			env,
 			"header.payload.signature",
-			resourceMetadataUrl,
 			"/mcp",
 		);
 
-		expect("response" in result && result.response.status).toBe(401);
-		expect(
-			"response" in result && result.response.headers.get("www-authenticate"),
-		).toBe(
-			`Bearer realm="mcp", error="invalid_token", scope="offline_access email", resource_metadata="${resourceMetadataUrl}"`,
-		);
-	});
-
-	test("returns 401 with resource metadata when no token is provided", async () => {
-		const resourceMetadataUrl = protectedResourceMetadataUrl(env, "/mcp");
-		const response = unauthorizedResponse(resourceMetadataUrl);
-
-		expect(response.status).toBe(401);
-		expect(response.headers.get("www-authenticate")).toBe(
-			`Bearer realm="mcp", scope="offline_access email", resource_metadata="${resourceMetadataUrl}"`,
-		);
-		expect(resourceMetadataUrl).toBe(
-			"https://mcp-theta.sam-app.ro/.well-known/oauth-protected-resource/mcp",
-		);
+		expect(result.scopes).toEqual(["email", "offline_access"]);
 	});
 
 	test("canonicalizes the external authorization server issuer", () => {
@@ -136,5 +115,19 @@ describe("auth", () => {
 				SUMUP_AUTH_HOST: "https://auth-theta.sam-app.ro",
 			}),
 		).toBe("https://auth-theta.sam-app.ro/");
+	});
+
+	test("builds protected resource metadata", () => {
+		expect(protectedResourceMetadataUrl(env, "/mcp")).toBe(
+			"https://mcp-theta.sam-app.ro/.well-known/oauth-protected-resource/mcp",
+		);
+		expect(protectedResourceMetadata(env, "/mcp")).toEqual({
+			resource: "https://mcp-theta.sam-app.ro/mcp",
+			authorization_servers: ["https://auth.sam-app.ro/"],
+			bearer_methods_supported: ["header"],
+			scopes_supported: ["offline_access", "email"],
+			resource_name: "SumUp MCP",
+			resource_documentation: "https://developer.sumup.com/tools/llms",
+		});
 	});
 });
