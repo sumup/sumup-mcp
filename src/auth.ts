@@ -1,7 +1,7 @@
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 
-import { PROTECTED_RESOURCE_WELL_KNOWN } from "./config";
+import { PROTECTED_RESOURCE_WELL_KNOWN, SCOPES_SUPPORTED } from "./config";
 import { protocolErrorResponse } from "./protocol";
 
 // Reuse one remote JWKS resolver per URL so jose can keep its own fetch/cache
@@ -52,8 +52,10 @@ export function unauthorizedResponse(resourceMetadataUrl: string): Response {
 }
 
 function authenticationRequiredResponse(resourceMetadataUrl: string): Response {
+	const scope = SCOPES_SUPPORTED.join(" ");
+
 	return protocolErrorResponse(401, "Authentication required", {
-		"www-authenticate": `Bearer realm="mcp", resource_metadata="${resourceMetadataUrl}"`,
+		"www-authenticate": `Bearer realm="mcp", scope="${scope}", resource_metadata="${resourceMetadataUrl}"`,
 	});
 }
 
@@ -164,11 +166,13 @@ function defaultAuthenticateHeader(
 	status: number,
 	resourceMetadataUrl: string,
 ): string {
+	const scope = SCOPES_SUPPORTED.join(" ");
+
 	if (status === 403) {
-		return `Bearer realm="mcp", error="insufficient_scope", resource_metadata="${resourceMetadataUrl}"`;
+		return `Bearer realm="mcp", error="insufficient_scope", scope="${scope}", resource_metadata="${resourceMetadataUrl}"`;
 	}
 
-	return `Bearer realm="mcp", error="invalid_token", resource_metadata="${resourceMetadataUrl}"`;
+	return `Bearer realm="mcp", error="invalid_token", scope="${scope}", resource_metadata="${resourceMetadataUrl}"`;
 }
 
 function resourceUrlForPath(env: AuthEnv, resourcePath: string): string {

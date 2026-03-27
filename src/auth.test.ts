@@ -111,7 +111,9 @@ describe("auth", () => {
 		expect("response" in result && result.response.status).toBe(401);
 		expect(
 			"response" in result && result.response.headers.get("www-authenticate"),
-		).toContain('error="invalid_token"');
+		).toBe(
+			`Bearer realm="mcp", error="invalid_token", scope="offline_access openid email", resource_metadata="${resourceMetadataUrl}"`,
+		);
 	});
 
 	test("returns 401 with resource metadata when no token is provided", async () => {
@@ -120,7 +122,7 @@ describe("auth", () => {
 
 		expect(response.status).toBe(401);
 		expect(response.headers.get("www-authenticate")).toBe(
-			`Bearer realm="mcp", resource_metadata="${resourceMetadataUrl}"`,
+			`Bearer realm="mcp", scope="offline_access openid email", resource_metadata="${resourceMetadataUrl}"`,
 		);
 		expect(resourceMetadataUrl).toBe(
 			"https://mcp-theta.sam-app.ro/.well-known/oauth-protected-resource/mcp",
