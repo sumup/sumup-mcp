@@ -4,7 +4,11 @@ import type { OAuthProtectedResourceMetadata } from "@modelcontextprotocol/sdk/s
 import { checkResourceAllowed } from "@modelcontextprotocol/sdk/shared/auth-utils.js";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 
-import { SCOPES_SUPPORTED, SERVICE_DOCUMENTATION_URL } from "./config";
+import {
+	MCP_ROUTE,
+	SCOPES_SUPPORTED,
+	SERVICE_DOCUMENTATION_URL,
+} from "./config";
 
 // Reuse one remote JWKS resolver per URL so jose can keep its own fetch/cache
 // state across token verifications instead of rebuilding it on every request.
@@ -30,7 +34,7 @@ export function protectedResourceMetadata(
 	env: AuthEnv,
 ): OAuthProtectedResourceMetadata {
 	return {
-		resource: env.HOST,
+		resource: new URL(MCP_ROUTE, env.HOST).toString(),
 		authorization_servers: [canonicalAuthorizationServer(env)],
 		bearer_methods_supported: ["header"],
 		scopes_supported: SCOPES_SUPPORTED,
@@ -48,11 +52,11 @@ export async function verifyAccessToken(
 	env: AuthEnv,
 	token: string,
 ): Promise<AuthInfo> {
-	const resourceUrl = env.HOST;
+	const resourceUrl = new URL(MCP_ROUTE, env.HOST).toString();
 	const issuer = canonicalAuthorizationServer(env);
 	const payload = await defaultVerifyJwt(token, {
 		issuer,
-		audience: [resourceUrl, new URL("/", env.HOST).toString()],
+		audience: [resourceUrl],
 		jwksUrl: new URL("/.well-known/jwks.json", issuer).toString(),
 	});
 

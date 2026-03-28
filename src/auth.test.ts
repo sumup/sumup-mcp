@@ -47,7 +47,7 @@ describe("auth", () => {
 			{ url: new URL("https://auth.sam-app.ro/.well-known/jwks.json") },
 			expect.objectContaining({
 				issuer: "https://auth.sam-app.ro/",
-				audience: [env.HOST, "https://mcp-theta.sam-app.ro/"],
+				audience: ["https://mcp-theta.sam-app.ro/mcp"],
 			}),
 		);
 	});
@@ -94,7 +94,7 @@ describe("auth", () => {
 
 	test("builds protected resource metadata", () => {
 		expect(protectedResourceMetadata(env)).toEqual({
-			resource: "https://mcp-theta.sam-app.ro",
+			resource: "https://mcp-theta.sam-app.ro/mcp",
 			authorization_servers: ["https://auth.sam-app.ro/"],
 			bearer_methods_supported: ["header"],
 			scopes_supported: ["offline_access", "email"],

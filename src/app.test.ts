@@ -65,7 +65,7 @@ describe("app metadata routes", () => {
 		expect(scopedResponse.status).toBe(200);
 		expect(sseResponse.status).toBe(200);
 		const expectedMcpMetadata = {
-			resource: "https://mcp-theta.sam-app.ro",
+			resource: "https://mcp-theta.sam-app.ro/mcp",
 			authorization_servers: ["https://auth.sam-app.ro/"],
 			bearer_methods_supported: ["header"],
 			scopes_supported: ["offline_access", "email"],
@@ -104,7 +104,7 @@ describe("app metadata routes", () => {
 
 		expect(response.status).toBe(401);
 		expect(response.headers.get("www-authenticate")).toBe(
-			'Bearer error="invalid_token", error_description="Missing Authorization header", scope="offline_access email", resource_metadata="https://mcp-theta.sam-app.ro/.well-known/oauth-protected-resource"',
+			'Bearer error="invalid_token", error_description="Missing Authorization header", scope="offline_access email", resource_metadata="https://mcp-theta.sam-app.ro/.well-known/oauth-protected-resource/mcp"',
 		);
 	});
 

@@ -30,7 +30,7 @@ const sseHandler = SumUpMcpAgent.serveSSE(SSE_ROUTE, {
 	binding: "SUMUP_MCP_AGENT",
 });
 
-const PROTECTED_RESOURCE_METADATA_URL = `${PROTECTED_RESOURCE_WELL_KNOWN}`;
+const PROTECTED_RESOURCE_METADATA_URL = `${PROTECTED_RESOURCE_WELL_KNOWN}${MCP_ROUTE}`;
 
 export function createApp(env: Env): Express {
 	const app = createMcpExpressApp({
