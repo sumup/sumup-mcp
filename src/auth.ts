@@ -35,7 +35,7 @@ export function protectedResourceMetadata(
 ): OAuthProtectedResourceMetadata {
 	return {
 		resource: new URL(MCP_ROUTE, env.HOST).toString(),
-		authorization_servers: [canonicalAuthorizationServer(env)],
+		authorization_servers: [env.SUMUP_AUTH_HOST],
 		bearer_methods_supported: ["header"],
 		scopes_supported: SCOPES_SUPPORTED,
 		resource_name: "SumUp MCP",
@@ -53,7 +53,7 @@ export async function verifyAccessToken(
 	token: string,
 ): Promise<AuthInfo> {
 	const resourceUrl = new URL(MCP_ROUTE, env.HOST).toString();
-	const issuer = canonicalAuthorizationServer(env);
+	const issuer = env.SUMUP_AUTH_HOST;
 	const payload = await defaultVerifyJwt(token, {
 		issuer,
 		audience: [resourceUrl],
@@ -91,10 +91,6 @@ function remoteJwks(jwksUrl: string): ReturnType<typeof createRemoteJWKSet> {
 	const jwks = createRemoteJWKSet(new URL(jwksUrl));
 	remoteJwksCache.set(jwksUrl, jwks);
 	return jwks;
-}
-
-function canonicalAuthorizationServer(env: AuthEnv): string {
-	return new URL("/", env.SUMUP_AUTH_HOST).toString();
 }
 
 function buildAuthInfo(
