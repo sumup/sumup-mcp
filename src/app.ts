@@ -39,6 +39,17 @@ export function createApp(env: Env): Express {
 
 	app.use(setCorsHeaders);
 
+	app.get("/", (_req, res) => {
+		res.json({
+			name: "SumUp MCP",
+			transports: {
+				streamableHttp: MCP_ROUTE,
+				sse: SSE_ROUTE,
+			},
+			resource_metadata: PROTECTED_RESOURCE_WELL_KNOWN,
+		});
+	});
+
 	app.get(PROTECTED_RESOURCE_WELL_KNOWN, (_req, res) => {
 		res.json(protectedResourceMetadata(env));
 	});
