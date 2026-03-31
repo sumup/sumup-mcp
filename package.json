@@ -52,6 +52,6 @@
 		"wrangler": "^4.76.0"
 	},
 	"optionalDependencies": {
-		"@biomejs/cli-darwin-arm64": "^2.4.5"
+		"@biomejs/cli-darwin-arm64": "^2.4.8"
 	}
 }
