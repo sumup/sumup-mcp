@@ -41,7 +41,7 @@
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.27.1",
 		"@sumup/agent-toolkit": "^0.11.0",
-		"agents": "^0.7.2",
+		"agents": "^0.16.2",
 		"jose": "^6.2.2"
 	},
 	"devDependencies": {
