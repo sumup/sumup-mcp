@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/sumup-sumup-mcp-badge.png)](https://mseep.ai/app/sumup-sumup-mcp)
+
 <div align="center">
 
 # SumUp MCP Server
