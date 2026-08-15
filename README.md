@@ -13,9 +13,11 @@ This package runs as a Cloudflare Worker and serves the MCP transport for SumUp.
 
 Authentication follows the MCP OAuth resource-server flow:
 
-- The worker publishes OAuth metadata and protected resource metadata via `@hono/mcp`.
+- The worker publishes protected resource metadata that points clients to the SumUp authorization server.
 - Clients send `Authorization: Bearer <access-token>` to `/mcp`.
 - Bearer tokens must be JWT access tokens issued by `SUMUP_AUTH_HOST` and valid for the worker resource URL.
+
+SumUp API keys such as `sup_sk_...` are not valid Bearer tokens for the hosted server.
 
 The worker exposes `/mcp` for Streamable HTTP and `/sse` for the legacy SSE transport. Both routes are pinned to a Durable Object so MCP session state survives across requests within the same Worker deployment.
 
@@ -38,6 +40,8 @@ Any client that speaks the Streamable HTTP transport can connect to this server.
   }
 }
 ```
+
+Replace `<your-access-token>` with an OAuth access token issued for the MCP resource. OAuth-capable clients can discover the authorization server from the protected resource metadata instead of requiring a token to be configured manually.
 
 ## Development
 

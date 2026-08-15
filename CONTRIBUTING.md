@@ -2,6 +2,8 @@
 
 ## Development
 
+Development requires Node.js 22 or later.
+
 ```sh
 npm install
 npm run dev
