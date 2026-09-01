@@ -42,7 +42,7 @@
 		"@modelcontextprotocol/sdk": "^1.29.0",
 		"@sumup/agent-toolkit": "^0.14.0",
 		"agents": "^0.17.3",
-		"jose": "^6.2.3"
+		"jose": "^6.2.8"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.10",
