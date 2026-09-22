@@ -7,13 +7,15 @@
 	"author": "SumUp <support@sumup.com> (https://sumup.com/)",
 	"mcpName": "io.github.sumup/mcp",
 	"scripts": {
-		"build": "tsc --noEmit -p tsconfig.json",
+		"build": "npm run typecheck",
+		"check": "npm run typecheck && npm run test && npm run lint",
 		"dev": "wrangler dev --local",
+		"predeploy": "npm run check",
 		"deploy": "wrangler deploy",
 		"test": "vitest run",
-		"typecheck": "tsc --noEmit -p tsconfig.json",
-		"lint": "biome check",
-		"lint:fix": "biome check --write",
+		"typecheck": "wrangler types --check && tsc --noEmit -p tsconfig.json",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
 		"generate-types": "wrangler types"
 	},
 	"publishConfig": {
@@ -36,22 +38,25 @@
 	],
 	"type": "module",
 	"engines": {
-		"node": ">=22"
+		"node": ">=22.12.0"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "^1.29.0",
-		"@sumup/agent-toolkit": "^0.14.0",
-		"agents": "^0.21.0",
-		"jose": "^6.2.8"
+		"@modelcontextprotocol/sdk": "1.30.0",
+		"@sumup/agent-toolkit": "0.15.0",
+		"agents": "0.24.0",
+		"jose": "6.2.12"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.10",
-		"@types/node": "^26.0.0",
-		"typescript": "^6.0.3",
-		"vitest": "^4.1.2",
-		"wrangler": "^4.107.0"
+		"@biomejs/biome": "2.5.14",
+		"@types/node": "26.6.2",
+		"typescript": "7.0.2",
+		"vitest": "5.0.1",
+		"wrangler": "4.136.3"
 	},
-	"optionalDependencies": {
-		"@biomejs/cli-darwin-arm64": "^2.5.2"
+	"allowScripts": {
+		"core-js-pure@3.48.0": false,
+		"esbuild@0.28.1": true,
+		"fsevents@2.3.3": true,
+		"workerd@1.20260921.1": true
 	}
 }

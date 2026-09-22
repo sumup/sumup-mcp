@@ -23,7 +23,11 @@ export interface AuthEnv {
 }
 
 export class SumUpOAuthTokenVerifier implements OAuthTokenVerifier {
-	constructor(private readonly env: AuthEnv) {}
+	private readonly env: AuthEnv;
+
+	constructor(env: AuthEnv) {
+		this.env = env;
+	}
 
 	verifyAccessToken(token: string): Promise<AuthInfo> {
 		return verifyAccessToken(this.env, token);
@@ -99,6 +103,7 @@ function buildAuthInfo(
 ): AuthInfo {
 	const scopes = parseScopes(claims);
 	const subject = stringClaim(claims, "sub");
+	const expiresAt = numberClaim(claims, "exp");
 	return {
 		token,
 		clientId:
@@ -107,8 +112,8 @@ function buildAuthInfo(
 			subject ??
 			"sumup-mcp",
 		scopes,
-		expiresAt: numberClaim(claims, "exp"),
-		extra: subject ? { subject } : undefined,
+		...(expiresAt !== undefined && { expiresAt }),
+		...(subject && { extra: { subject } }),
 	};
 }
 

@@ -1,17 +1,13 @@
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
+	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "sumup-mcp",
 	"main": "src/worker.ts",
-	"compatibility_date": "2025-08-15",
+	"compatibility_date": "2026-09-21",
 	"workers_dev": true,
 	"preview_urls": true,
 	"upload_source_maps": true,
-	"compatibility_flags": ["nodejs_compat"],
 	"observability": {
 		"enabled": true
-	},
-	"build": {
-		"command": "npm run build"
 	},
 	"migrations": [
 		{
@@ -22,9 +18,6 @@
 	"env": {
 		"dev": {
 			"account_id": "2037fc18a2fb8175c20d20776cac65c5",
-			"build": {
-				"command": "npm run build"
-			},
 			"vars": {
 				"HOST": "https://mcp-theta.sam-app.ro",
 				"SUMUP_API_HOST": "https://api-theta.sam-app.ro",
@@ -47,9 +40,6 @@
 		},
 		"stage": {
 			"account_id": "2037fc18a2fb8175c20d20776cac65c5",
-			"build": {
-				"command": "npm run build"
-			},
 			"vars": {
 				"HOST": "https://mcp.sam-app.ro",
 				"SUMUP_API_HOST": "https://api.sam-app.ro",
@@ -72,9 +62,6 @@
 		},
 		"live": {
 			"account_id": "2037fc18a2fb8175c20d20776cac65c5",
-			"build": {
-				"command": "npm run build"
-			},
 			"vars": {
 				"HOST": "https://mcp.sumup.com",
 				"SUMUP_API_HOST": "https://api.sumup.com",

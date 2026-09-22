@@ -34,10 +34,13 @@ const env = {
 function createExecutionContext(): ExecutionContext {
 	return {
 		props: {},
+		exports: {} as Cloudflare.Exports,
+		tracing: {} as Tracing,
 		waitUntil(promise) {
 			void promise.catch(() => {});
 		},
 		passThroughOnException() {},
+		abort() {},
 	} satisfies ExecutionContext;
 }
 

@@ -22,9 +22,7 @@ npx @modelcontextprotocol/inspector
 Run the local checks before opening a PR:
 
 ```sh
-npm run build
-npm run test
-npm run lint
+npm run check
 ```
 
 ## Local package development

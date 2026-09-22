@@ -27,14 +27,8 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
-      - name: Setup Biome CLI
-        uses: biomejs/setup-biome@4c91541eaada48f67d7dbd7833600ce162b68f51 # v2.7.1
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
-      - name: Lint code
-        run: biome ci --diagnostic-level=error --reporter=github
+      - name: Check generated types, typecheck, test, and lint
+        run: npm run check

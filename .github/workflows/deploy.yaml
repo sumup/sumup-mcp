@@ -36,6 +36,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check generated types, typecheck, test, and lint
+        run: npm run check
+
       - name: Deploy Worker
         run: npx wrangler deploy --env live
         env:
@@ -61,6 +64,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check generated types, typecheck, test, and lint
+        run: npm run check
+
       - name: Deploy Worker
         run: npx wrangler deploy --env stage
         env:
@@ -85,6 +91,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Check generated types, typecheck, test, and lint
+        run: npm run check
 
       - name: Deploy Worker
         run: npx wrangler deploy --env dev

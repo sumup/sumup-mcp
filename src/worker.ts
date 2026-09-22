@@ -150,7 +150,7 @@ function bearerToken(request: Request): string {
 	}
 
 	const [type, token] = authHeader.split(" ");
-	if (type.toLowerCase() !== "bearer" || !token) {
+	if (type?.toLowerCase() !== "bearer" || !token) {
 		throw new InvalidTokenError(
 			"Invalid Authorization header format, expected 'Bearer TOKEN'",
 		);
@@ -250,11 +250,15 @@ function jsonResponse(
 		status?: number;
 	},
 ): Response {
-	return new Response(JSON.stringify(body), {
-		status: init?.status,
+	const responseInit: ResponseInit = {
 		headers: withCorsHeaders({
 			"content-type": "application/json",
 			...init?.headers,
 		}),
-	});
+	};
+	if (init?.status !== undefined) {
+		responseInit.status = init.status;
+	}
+
+	return new Response(JSON.stringify(body), responseInit);
 }
