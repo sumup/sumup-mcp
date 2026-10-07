@@ -23,25 +23,54 @@ The worker exposes `/mcp` for Streamable HTTP and `/sse` for the legacy SSE tran
 
 ## Using from an MCP client
 
-Any client that speaks the Streamable HTTP transport can connect to this server. For example, using [`mcp-remote`](https://www.npmjs.com/package/mcp-remote):
+Connect an OAuth-capable Streamable HTTP client to `https://mcp.sumup.com/mcp` and sign in with SumUp in your browser. The client discovers the authorization server from the protected resource metadata.
+
+### Install skills and MCP together
+
+The [SumUp plugin](https://github.com/sumup/sumup-skills) includes integration skills and hosted MCP configuration. For Codex:
+
+```sh
+codex plugin marketplace add sumup/sumup-skills
+codex plugin add sumup@sumup
+codex plugin list
+```
+
+Start a new session and complete authorization when prompted. For other assistants, see the [plugin setup guide](https://developer.sumup.com/tools/llms/plugins/).
+
+### Connect directly
+
+If you only need MCP tools, configure the hosted server directly. For Codex:
+
+```sh
+codex mcp add sumup --url https://mcp.sumup.com/mcp
+codex mcp login sumup
+codex mcp list
+```
+
+For Claude Code:
+
+```sh
+claude mcp add --transport http --scope user sumup https://mcp.sumup.com/mcp
+claude mcp list
+```
+
+Open `/mcp` in Claude Code to authenticate. For Cursor, merge this entry into `~/.cursor/mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "sumup": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://mcp.sumup.com/mcp",
-        "--headers",
-        "Authorization: Bearer <your-access-token>"
-      ]
+      "url": "https://mcp.sumup.com/mcp"
     }
   }
 }
 ```
 
-Replace `<your-access-token>` with an OAuth access token issued for the MCP resource. OAuth-capable clients can discover the authorization server from the protected resource metadata instead of requiring a token to be configured manually.
+Complete authorization in Cursor's MCP settings. If you installed the SumUp plugin, use its bundled connection instead of adding a duplicate manual entry.
+
+After connecting, try a read-only prompt: "Use the SumUp MCP tools to show my merchant profile."
+
+See the [MCP setup guide](https://developer.sumup.com/tools/llms/mcp-server/) for Gemini CLI, VS Code, Claude Desktop, and troubleshooting. For stdio clients and API-key workflows, use the [local MCP CLI](https://github.com/sumup/sumup-ai/tree/main/mcp), which requires Node.js 22 or later.
 
 ## Development
 
