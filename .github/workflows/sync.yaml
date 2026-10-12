@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: connor-baer/action-sync-branch@066ffc273774493f6327c8f373ef14228961af9c # v2.0.1
+      - uses: connor-baer/action-sync-branch@4f44fe844a1a3f53676699cfe74453820a38ca65 # v2.0.2
         with:
           branch: dev
           token: ${{ secrets.GH_ACTIONS_PAT }}
@@ -26,7 +26,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: connor-baer/action-sync-branch@066ffc273774493f6327c8f373ef14228961af9c # v2.0.1
+      - uses: connor-baer/action-sync-branch@4f44fe844a1a3f53676699cfe74453820a38ca65 # v2.0.2
         with:
           branch: stage
           token: ${{ secrets.GH_ACTIONS_PAT }}
