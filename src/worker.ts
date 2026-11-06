@@ -119,12 +119,8 @@ async function authenticateAndHandle(
 		const token = bearerToken(request);
 		const authInfo = await verifyAccessToken(env, token);
 
-		const hasAllScopes = SCOPES_SUPPORTED.every((scope) =>
-			authInfo.scopes.includes(scope),
-		);
-		if (!hasAllScopes) {
-			throw new InsufficientScopeError("Insufficient scope");
-		}
+		// Discovery lists supported scopes, not prerequisites for initialization.
+		// Tool calls remain subject to the API's scope checks.
 
 		if (
 			typeof authInfo.expiresAt !== "number" ||

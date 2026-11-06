@@ -140,11 +140,11 @@ describe("worker", () => {
 		});
 	});
 
-	test("passes valid bearer tokens to the MCP handler via props", async () => {
+	test("initializes with a valid API-scoped token without email", async () => {
 		vi.mocked(verifyAccessToken).mockResolvedValueOnce({
 			token: "test-token",
 			clientId: "client-123",
-			scopes: ["offline_access", "email"],
+			scopes: ["offline_access", "checkouts.read"],
 			expiresAt: Math.floor(Date.now() / 1000) + 300,
 		});
 
