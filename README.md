@@ -35,7 +35,7 @@ codex plugin add sumup@sumup
 codex plugin list
 ```
 
-Start a new session and complete authorization when prompted. For other assistants, see the [plugin setup guide](https://developer.sumup.com/tools/llms/plugins/).
+Start a new session and complete authorization when prompted. For other assistants, see the [assistant setup guide](https://developer.sumup.com/tools/llms/setup/).
 
 ### Connect directly
 
@@ -70,7 +70,7 @@ Complete authorization in Cursor's MCP settings. If you installed the SumUp plug
 
 After connecting, try a read-only prompt: "Use the SumUp MCP tools to show my merchant profile."
 
-See the [MCP setup guide](https://developer.sumup.com/tools/llms/mcp-server/) for Gemini CLI, VS Code, Claude Desktop, and troubleshooting. For stdio clients and API-key workflows, use the [local MCP CLI](https://github.com/sumup/sumup-ai/tree/main/mcp), which requires Node.js 22 or later.
+See the [assistant setup guide](https://developer.sumup.com/tools/llms/setup/) for Gemini CLI, VS Code, and Claude Desktop, or the [MCP guide](https://developer.sumup.com/tools/llms/mcp-server/#troubleshooting) for troubleshooting. For stdio clients and API-key workflows, use the [local MCP CLI](https://github.com/sumup/sumup-ai/tree/main/mcp), which requires Node.js 22 or later.
 
 ## Development
 
